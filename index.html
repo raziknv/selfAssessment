@@ -20,8 +20,8 @@
   .field { margin-bottom:14px; }
   label { display:block; font-weight:600; margin-bottom:4px; }
   label small { display:block; font-weight:400; color:var(--muted); font-size:.82rem; }
-  input, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
-  input:focus, textarea:focus { outline:2px solid var(--green); border-color:transparent; }
+  input, textarea, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  input:focus, textarea:focus, select:focus { outline:2px solid var(--green); border-color:transparent; }
   textarea { min-height:70px; resize:vertical; }
   .req { color:var(--err); }
   button { width:100%; padding:14px; border:0; border-radius:10px; background:var(--green); color:#fff; font:inherit; font-weight:700; font-size:1.05rem; cursor:pointer; }
@@ -68,6 +68,14 @@ const SECTIONS = [
     { name:'mobile',    ml:'മൊബൈൽ നമ്പർ', en:'Mobile number', type:'tel', required:true },
     { name:'zone',      ml:'സോൺ / ജില്ല', en:'Zone / District', type:'text' },
     { name:'unit',      ml:'യൂണിറ്റ്', en:'Unit', type:'text' },
+  ]},
+  { title: 'താങ്കളെക്കുറിച്ച് · About you', fields: [
+    { name:'years_in_oman',  ml:'ഒമാനിൽ എത്ര വർഷമായി', en:'Years in Oman', type:'number' },
+    { name:'places_worked',  ml:'എവിടെയൊക്കെ വർക്ക് ചെയ്തു', en:'Places where you have worked', type:'textarea' },
+    { name:'worked_other_gulf', ml:'മറ്റു ഗൾഫ് രാജ്യങ്ങളിൽ വർക്ക് ചെയ്തിട്ടുണ്ടോ', en:'Have you worked in other Gulf countries?', type:'yesno' },
+    { name:'other_gulf_years', ml:'എത്ര വർഷം', en:'How many years', type:'number', showIf:{ name:'worked_other_gulf', value:'yes' } },
+    { name:'home_org_positions', ml:'നാട്ടിൽ വഹിച്ച സംഘടനാ സ്ഥാനം', en:'Organisational positions held back home', type:'textarea' },
+    { name:'dai_self_evaluation', ml:'ദാഇ എന്ന നിലയിൽ സ്വയം വിലയിരുത്തൽ', en:'Your self-evaluation as a Da\'i', type:'textarea' },
   ]},
   { title: '1. താങ്കൾ മുഖേന നടന്ന പ്രവർത്തനങ്ങളുടെ വിവരങ്ങൾ · Activities through you', fields: [
     { name:'umrah_count',          ml:'ഉംറക്ക് പോയവരുടെ എണ്ണം', en:'Number of people who went for Umrah', type:'number' },
@@ -118,6 +126,10 @@ SECTIONS.forEach(sec => {
     label.innerHTML = `${f.ml}${f.required ? ' <span class="req">*</span>' : ''}<small>${f.en}</small>`;
     let input;
     if (f.type === 'textarea') { input = document.createElement('textarea'); }
+    else if (f.type === 'yesno') {
+      input = document.createElement('select');
+      input.innerHTML = '<option value="">— തിരഞ്ഞെടുക്കുക · Select —</option><option value="yes">അതെ · Yes</option><option value="no">ഇല്ല · No</option>';
+    }
     else {
       input = document.createElement('input'); input.type = f.type;
       if (f.type === 'number') { input.min = 0; input.step = 1; input.inputMode = 'numeric'; input.value = 0; }
@@ -125,8 +137,16 @@ SECTIONS.forEach(sec => {
     }
     input.id = input.name = f.name; if (f.required) input.required = true;
     wrap.append(label, input); fs.appendChild(wrap);
+    f.wrap = wrap; if (f.showIf) wrap.style.display = 'none';
   });
   sectionsEl.appendChild(fs);
+});
+
+/* Show follow-up questions only when the controlling answer matches */
+allFields.filter(f => f.showIf).forEach(f => {
+  const ctl = document.getElementById(f.showIf.name);
+  const update = () => { f.wrap.style.display = ctl.value === f.showIf.value ? '' : 'none'; };
+  ctl.addEventListener('change', update); update();
 });
 
 /* ============ Submit ============ */
@@ -145,8 +165,10 @@ form.addEventListener('submit', async (e) => {
   const row = {};
   for (const f of allFields) {
     const el = document.getElementById(f.name);
-    let v = el.value.trim();
+    const hidden = f.wrap && f.wrap.style.display === 'none';
+    let v = hidden ? '' : el.value.trim();
     if (f.required && !v) { el.focus(); return showError('ആവശ്യമായ വിവരങ്ങൾ പൂരിപ്പിക്കുക · Please fill the required fields.'); }
+    if (f.type === 'yesno') { row[f.name] = v === '' ? null : v === 'yes'; continue; }
     if (f.type === 'number') {
       const n = v === '' ? 0 : Number(v);
       if (!Number.isInteger(n) || n < 0) { el.focus(); return showError('സംഖ്യ 0 അല്ലെങ്കിൽ അതിൽ കൂടുതലായിരിക്കണം · Enter a whole number, 0 or more.'); }
