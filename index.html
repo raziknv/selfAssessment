@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scholars Meet – Self Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root { --green:#0f6b4f; --bg:#f4f7f5; --card:#fff; --text:#1d2b25; --muted:#66756e; --line:#d9e2dd; --err:#b3261e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Noto Sans Malayalam',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  header { background:var(--green); color:#fff; padding:28px 16px; text-align:center; }
+  header h1 { margin:0 0 4px; font-size:1.5rem; }
+  header p { margin:0; opacity:.9; font-size:.95rem; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  fieldset { border:1px solid var(--line); background:var(--card); border-radius:12px; margin:0 0 16px; padding:16px 18px 6px; }
+  legend { font-weight:700; color:var(--green); padding:0 8px; font-size:1.05rem; }
+  .field { margin-bottom:14px; }
+  label { display:block; font-weight:600; margin-bottom:4px; }
+  label small { display:block; font-weight:400; color:var(--muted); font-size:.82rem; }
+  input, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  input:focus, textarea:focus { outline:2px solid var(--green); border-color:transparent; }
+  textarea { min-height:70px; resize:vertical; }
+  .req { color:var(--err); }
+  button { width:100%; padding:14px; border:0; border-radius:10px; background:var(--green); color:#fff; font:inherit; font-weight:700; font-size:1.05rem; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #msg { margin:12px 0; padding:12px 14px; border-radius:8px; display:none; }
+  #msg.err { display:block; background:#fdecea; color:var(--err); }
+  #thanks { display:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:32px 20px; text-align:center; }
+  #thanks h2 { color:var(--green); margin-top:0; }
+  .hp { position:absolute; left:-9999px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>സെൽഫ് അസ്സസ്സ്മെന്റ്</h1>
+  <p>Scholars Meet · Self Assessment</p>
+</header>
+
+<main>
+  <div id="thanks">
+    <h2>جزاكم الله خيراً</h2>
+    <p>നിങ്ങളുടെ സെൽഫ് അസ്സസ്സ്മെന്റ് സ്വീകരിച്ചു. നന്ദി.<br><small>Your response has been submitted. Thank you.</small></p>
+  </div>
+
+  <form id="form" novalidate>
+    <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div id="sections"></div>
+    <div id="msg"></div>
+    <button type="submit" id="submitBtn">സമർപ്പിക്കുക · Submit</button>
+  </form>
+</main>
+
+<script>
+/* ============ 1. PUT YOUR SUPABASE DETAILS HERE ============ */
+const SUPABASE_URL  = 'https://vpgvxhqzuypjjhihqhmv.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwZ3Z4aHF6dXlwampoaWhxaG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMTU3NzYsImV4cCI6MjEwOTY5MTc3Nn0.SniaUet5RfGFR6Oa_8sPyXXVN6Nxianeu68b1CCT9f8';
+/* ============================================================ */
+
+/* ============ 2. QUESTIONS (edit wording here) ============
+   type: text | tel | number | textarea
+   `name` must match a column in schema.sql                    */
+const SECTIONS = [
+  { title: 'വ്യക്തിഗത വിവരങ്ങൾ · Your details', fields: [
+    { name:'full_name', ml:'പേര്', en:'Full name', type:'text', required:true },
+    { name:'mobile',    ml:'മൊബൈൽ നമ്പർ', en:'Mobile number', type:'tel', required:true },
+    { name:'zone',      ml:'സോൺ / ജില്ല', en:'Zone / District', type:'text' },
+    { name:'unit',      ml:'യൂണിറ്റ്', en:'Unit', type:'text' },
+  ]},
+  { title: '1. താങ്കൾ മുഖേന നടന്ന പ്രവർത്തനങ്ങളുടെ വിവരങ്ങൾ · Activities through you', fields: [
+    { name:'umrah_count',          ml:'ഉംറക്ക് പോയവരുടെ എണ്ണം', en:'Number of people who went for Umrah', type:'number' },
+    { name:'pravasi_vayana_count', ml:'പ്രവാസി വായന വരിക്കാരാക്കിയവരുടെ എണ്ണം', en:'Pravasi Vayana subscribers added', type:'number' },
+    { name:'membership_count',     ml:'മെമ്പർഷിപ്പ് എടുത്തവരുടെ എണ്ണം', en:'Memberships taken', type:'number' },
+    { name:'rifai_care_count',     ml:'രിഫാഈ കെയർ ചേർത്തവരുടെ എണ്ണം', en:'Rifai Care enrolments', type:'number' },
+    { name:'madrasa_new_students', ml:'മദ്റസകളിൽ പുതുതായി ചേർന്ന വിദ്യാർഥികളുടെ എണ്ണം', en:'New students admitted to madrasas', type:'number' },
+    { name:'madrasa_campaign_details', ml:'മദ്റസ അഡ്മിഷൻ ക്യാമ്പയിനിൽ പങ്കാളിത്തം', en:'Participation in the madrasa admission campaign (describe)', type:'textarea' },
+    { name:'hadiya_count',         ml:'ഹദിയയിലേക്ക് ചേർന്നവരുടെ എണ്ണം', en:'People enrolled in Hadiya', type:'number' },
+  ]},
+  { title: '2. പരിചയപ്പെട്ട പ്രൊഫഷണലുകൾ · Professionals you met', fields: [
+    { name:'doctors_count',     ml:'ഡോക്ടർമാർ', en:'Doctors', type:'number' },
+    { name:'engineers_count',   ml:'എൻജിനീയർമാർ', en:'Engineers', type:'number' },
+    { name:'teachers_count',    ml:'അധ്യാപകർ', en:'Teachers', type:'number' },
+    { name:'accountants_count', ml:'അക്കൗണ്ടന്റുമാർ', en:'Accountants', type:'number' },
+    { name:'other_professions_count',   ml:'മറ്റു പ്രൊഫഷനുകൾ (എണ്ണം)', en:'Other professions (count)', type:'number' },
+    { name:'other_professions_details', ml:'മറ്റു പ്രൊഫഷനുകൾ (വിശദാംശം)', en:'Other professions (which ones)', type:'textarea' },
+  ]},
+  { title: '3. യൂണിറ്റുകൾ · Units', fields: [
+    { name:'new_units_count',     ml:'താങ്കൾ മുഖേന പുതുതായി രൂപീകരിച്ച യൂണിറ്റുകൾ എത്ര', en:'New units formed through you', type:'number' },
+    { name:'new_units_names',     ml:'ഏതൊക്കെ', en:'Which units', type:'textarea' },
+    { name:'revived_units_count', ml:'പുനരുജ്ജീവിപ്പിച്ച നിർജീവ യൂണിറ്റുകൾ (എണ്ണം)', en:'Inactive units revived (count)', type:'number' },
+    { name:'revived_units_names', ml:'പുനരുജ്ജീവിപ്പിച്ച യൂണിറ്റുകൾ ഏതൊക്കെ', en:'Which units were revived', type:'textarea' },
+  ]},
+  { title: '4. മഹ്ളറ · Mahlara', fields: [
+    { name:'new_mahlara_count',  ml:'പുതുതായി തുടങ്ങിയവ (എണ്ണം)', en:'New Mahlara started (count)', type:'number' },
+    { name:'new_mahlara_places', ml:'പുതുതായി തുടങ്ങിയവ (സ്ഥലം)', en:'Places of new Mahlara', type:'textarea' },
+    { name:'mahlara_development_actions', ml:'നിലവിലുള്ളവ വികസിപ്പിക്കാൻ ചെയ്തത്', en:'What you did to develop existing Mahlara', type:'textarea' },
+    { name:'mahlara_programs',   ml:'നടത്തിയ പരിപാടികൾ', en:'Programs conducted', type:'textarea' },
+    { name:'mahlara_avg_attendance', ml:'ശരാശരി ഹാജർ', en:'Average attendance', type:'number' },
+  ]},
+  { title: '5. ആശയ പരിവർത്തനം · Conversions', fields: [
+    { name:'bidat_returnees_count', ml:'താങ്കൾ മുഖേന സുന്നി ആശയത്തിലേക്ക് വന്ന ബിദ്അത്തുകാർ എത്ര', en:'People who returned to the Sunni path through you', type:'number' },
+    { name:'new_muslims_count',     ml:'താങ്കൾ മുഖേന വന്ന പുതുമുസ്‌ലിംകളുടെ എണ്ണം', en:'New Muslims through you', type:'number' },
+  ]},
+];
+
+/* ============ Rendering ============ */
+const sectionsEl = document.getElementById('sections');
+const allFields = [];
+SECTIONS.forEach(sec => {
+  const fs = document.createElement('fieldset');
+  const lg = document.createElement('legend'); lg.textContent = sec.title; fs.appendChild(lg);
+  sec.fields.forEach(f => {
+    allFields.push(f);
+    const wrap = document.createElement('div'); wrap.className = 'field';
+    const label = document.createElement('label'); label.htmlFor = f.name;
+    label.innerHTML = `${f.ml}${f.required ? ' <span class="req">*</span>' : ''}<small>${f.en}</small>`;
+    let input;
+    if (f.type === 'textarea') { input = document.createElement('textarea'); }
+    else {
+      input = document.createElement('input'); input.type = f.type;
+      if (f.type === 'number') { input.min = 0; input.step = 1; input.inputMode = 'numeric'; input.value = 0; }
+      if (f.type === 'tel') input.inputMode = 'tel';
+    }
+    input.id = input.name = f.name; if (f.required) input.required = true;
+    wrap.append(label, input); fs.appendChild(wrap);
+  });
+  sectionsEl.appendChild(fs);
+});
+
+/* ============ Submit ============ */
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const form = document.getElementById('form');
+const msg = document.getElementById('msg');
+const btn = document.getElementById('submitBtn');
+
+function showError(t) { msg.className = 'err'; msg.textContent = t; msg.scrollIntoView({behavior:'smooth', block:'center'}); }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.className = ''; msg.style.display = 'none';
+  if (form.website.value) return;                       // honeypot: bots fill this
+
+  const row = {};
+  for (const f of allFields) {
+    const el = document.getElementById(f.name);
+    let v = el.value.trim();
+    if (f.required && !v) { el.focus(); return showError('ആവശ്യമായ വിവരങ്ങൾ പൂരിപ്പിക്കുക · Please fill the required fields.'); }
+    if (f.type === 'number') {
+      const n = v === '' ? 0 : Number(v);
+      if (!Number.isInteger(n) || n < 0) { el.focus(); return showError('സംഖ്യ 0 അല്ലെങ്കിൽ അതിൽ കൂടുതലായിരിക്കണം · Enter a whole number, 0 or more.'); }
+      row[f.name] = n;
+    } else row[f.name] = v || null;
+  }
+
+  btn.disabled = true; btn.textContent = 'അയക്കുന്നു… · Submitting…';
+  const { error } = await db.from('self_assessments').insert(row);   // no .select(): anon can't read
+  if (error) {
+    console.error(error);
+    btn.disabled = false; btn.textContent = 'സമർപ്പിക്കുക · Submit';
+    return showError('സമർപ്പിക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക · Could not submit, please try again.');
+  }
+  form.style.display = 'none';
+  document.getElementById('thanks').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
