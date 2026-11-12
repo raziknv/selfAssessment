@@ -31,6 +31,7 @@
   #thanks { display:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:32px 20px; text-align:center; }
   #thanks h2 { color:var(--green); margin-top:0; }
   .hp { position:absolute; left:-9999px; }
+  .note { background:#e8f3ee; border:1px solid #bcd8cb; border-radius:12px; padding:14px 16px; margin-bottom:16px; }
 </style>
 </head>
 <body>
@@ -43,6 +44,11 @@
   <div id="thanks">
     <h2>جزاكم الله خيراً</h2>
     <p>നിങ്ങളുടെ സെൽഫ് അസ്സസ്സ്മെന്റ് സ്വീകരിച്ചു. നന്ദി.<br><small>Your response has been submitted. Thank you.</small></p>
+  </div>
+
+  <div class="note">
+    🔒 ഇത് <b>അജ്ഞാത (Anonymous)</b> ഫോമാണ്. പേരോ നമ്പറോ ശേഖരിക്കുന്നില്ല. ആരാണ് പൂരിപ്പിച്ചതെന്ന് അറിയാൻ കഴിയില്ല. അതിനാൽ സത്യസന്ധമായും പൂർണ്ണമായും പൂരിപ്പിക്കുക.<br>
+    <small>This form is anonymous. No name or number is collected, so please answer honestly and fully.</small>
   </div>
 
   <form id="form" novalidate>
@@ -63,12 +69,6 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
    type: text | tel | number | textarea
    `name` must match a column in schema.sql                    */
 const SECTIONS = [
-  { title: 'വ്യക്തിഗത വിവരങ്ങൾ · Your details', fields: [
-    { name:'full_name', ml:'പേര്', en:'Full name', type:'text', required:true },
-    { name:'mobile',    ml:'മൊബൈൽ നമ്പർ', en:'Mobile number', type:'tel', required:true },
-    { name:'zone',      ml:'സോൺ / ജില്ല', en:'Zone / District', type:'text' },
-    { name:'unit',      ml:'യൂണിറ്റ്', en:'Unit', type:'text' },
-  ]},
   { title: 'താങ്കളെക്കുറിച്ച് · About you', fields: [
     { name:'years_in_oman',  ml:'ഒമാനിൽ എത്ര വർഷമായി', en:'Years in Oman', type:'number' },
     { name:'places_worked',  ml:'എവിടെയൊക്കെ വർക്ക് ചെയ്തു', en:'Places where you have worked', type:'textarea' },
