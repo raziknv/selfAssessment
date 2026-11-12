@@ -47,7 +47,7 @@
   </div>
 
   <div class="note">
-    🔒 പേര് വിവരങ്ങൾ ചോദിക്കാത്തത് കൃത്യമായ വിവരങ്ങൾ കിട്ടാൻ വേണ്ടിയാണ്. അതുകൊണ്ട് <b>പൂർണമായും കൃത്യമായും ഡീറ്റെയിൽസ്</b>പൂരിപ്പിച്ചു സഹകരിക്കണമെന്ന് അഭ്യർത്ഥിക്കുന്നു.<br>
+    🔒 പേര് വിവരങ്ങൾ ചോദിക്കാത്തത് കൃത്യമായ വിവരങ്ങൾ കിട്ടാൻ വേണ്ടിയാണ്. അതുകൊണ്ട് <b>പൂർണമായും കൃത്യമായും ഡീറ്റെയിൽസ്</b> പൂരിപ്പിച്ചു സഹകരിക്കണമെന്ന് അഭ്യർത്ഥിക്കുന്നു.<br>
   </div>
 
   <form id="form" novalidate>
@@ -70,9 +70,9 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const SECTIONS = [
   { title: 'താങ്കളെക്കുറിച്ച് · About you', fields: [
     { name:'years_in_oman',  ml:'ഒമാനിൽ എത്ര വർഷമായി', en:'Years in Oman', type:'number' },
-    { name:'places_worked',  ml:'എവിടെയൊക്കെ വർക്ക് ചെയ്തു', en:'Places where you have worked', type:'textarea' },
     { name:'worked_other_gulf', ml:'മറ്റു ഗൾഫ് രാജ്യങ്ങളിൽ വർക്ക് ചെയ്തിട്ടുണ്ടോ', en:'Have you worked in other Gulf countries?', type:'yesno' },
     { name:'other_gulf_years', ml:'എത്ര വർഷം', en:'How many years', type:'number', showIf:{ name:'worked_other_gulf', value:'yes' } },
+    { name:'places_worked',  ml:'എവിടെയൊക്കെ വർക്ക് ചെയ്തു', en:'Places where you have worked', type:'textarea' },
     { name:'home_org_positions', ml:'നാട്ടിൽ വഹിച്ച സംഘടനാ സ്ഥാനം', en:'Organisational positions held back home', type:'textarea' },
     { name:'dai_self_evaluation', ml:'ദാഇ എന്ന നിലയിൽ സ്വയം വിലയിരുത്തൽ', en:'Your self-evaluation as a Da\'i', type:'textarea' },
   ]},
